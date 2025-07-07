@@ -3,12 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:school_bus_tracking_app/screens/live_bus_tracking_screen.dart';
-import 'package:school_bus_tracking_app/screens/support_screen.dart';
+import 'package:school_bus_app/screens/live_bus_tracking_screen.dart';
+import 'package:school_bus_app/screens/profile_screen.dart';
+import 'package:school_bus_app/screens/support_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:school_bus_tracking_app/screens/profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
@@ -21,7 +22,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     with SingleTickerProviderStateMixin {
   bool isActive = false;
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
-  final String driverId = 'Driver1';
+  late final String driverId;
   LatLng busLocation = const LatLng(24.7236, 46.6853);
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -29,6 +30,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void initState() {
     super.initState();
+    driverId = FirebaseAuth.instance.currentUser!.uid;
     _initializeFirebase();
 
     _animationController = AnimationController(
@@ -70,7 +72,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     }
   }
 
-  Future<void> _handleLocationAndFirebaseUpdate(bool newValue) async {
+  Future<void> _handleLocationAndFirebaseUpdateWithId(
+    String driverId,
+    bool newValue,
+  ) async {
     if (newValue) {
       final status = await _requestLocationPermission();
       if (status == PermissionStatus.granted) {
@@ -285,8 +290,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       onTap: () {
                         setState(() {
                           isActive = !isActive;
-                          _handleLocationAndFirebaseUpdate(isActive);
                         });
+                        _handleLocationAndFirebaseUpdateWithId(
+                          driverId,
+                          isActive,
+                        );
                       },
                       child: Text(
                         isActive ? 'Active' : 'Inactive',
@@ -304,8 +312,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       onChanged: (val) {
                         setState(() {
                           isActive = val;
-                          _handleLocationAndFirebaseUpdate(val);
                         });
+                        _handleLocationAndFirebaseUpdateWithId(driverId, val);
                       },
                       activeColor: const Color(0xFFF97316),
                       inactiveThumbColor: Colors.grey[400],

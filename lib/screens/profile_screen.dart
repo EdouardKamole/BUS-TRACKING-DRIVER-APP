@@ -1,5 +1,7 @@
-// lib/screens/profile_screen.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:school_bus_app/screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -7,20 +9,50 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String name = 'Mohammed Ali';
-  String phone = '+966501234567';
-  String email = 'mohammed.ali@email.com';
-  String photoUrl = 'https://example.com/student.jpg';
+  String name = '';
+  String phone = '';
+  String email = '';
+  String photoUrl = '';
 
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
 
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final User? _user = FirebaseAuth.instance.currentUser;
+
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: name);
-    _phoneController = TextEditingController(text: phone);
+    _nameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _fetchProfileData();
+  }
+
+  Future<void> _fetchProfileData() async {
+    if (_user == null) return;
+    final uid = _user!.uid;
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        setState(() {
+          name = data['fullName'] ?? '';
+          phone = data['phone'] ?? '';
+          email = data['email'] ?? _user!.email ?? '';
+          photoUrl = data['photoUrl'] ?? '';
+          _nameController.text = name;
+          _phoneController.text = phone;
+        });
+      } else {
+        setState(() {
+          email = _user!.email ?? '';
+        });
+      }
+    } catch (e) {
+      setState(() {});
+      // Optionally show error
+    }
   }
 
   @override
@@ -309,10 +341,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _logout() {
-    // Replace with real logout logic later
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Logged out')));
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 }

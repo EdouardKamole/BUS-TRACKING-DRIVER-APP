@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:school_bus_tracking_app/screens/password_reset_screen.dart';
+import 'package:school_bus_app/screens/home_screen.dart';
+import 'package:school_bus_app/screens/password_reset_screen.dart';
 import 'registration_screen.dart';
-import 'student_home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -62,12 +62,7 @@ class _LoginScreenState extends State<LoginScreen>
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder:
-                (context) => StudentHomeScreen(
-                  studentName: _emailController.text.trim(),
-                ),
-          ),
+          MaterialPageRoute(builder: (context) => DriverHomeScreen()),
         );
       } on FirebaseAuthException catch (e) {
         setState(() {

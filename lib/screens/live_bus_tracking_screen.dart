@@ -3,6 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:open_route_service/open_route_service.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LiveBusTrackingScreen extends StatefulWidget {
   const LiveBusTrackingScreen({Key? key}) : super(key: key);
@@ -16,6 +18,8 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   LatLng busLocation = const LatLng(24.7236, 46.6853);
   List<Map<String, dynamic>> activeStudents = [];
   Map<String, dynamic>? selectedStudent;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Map<String, String> _userNamesCache = {}; // studentId -> fullName
   List<LatLng> routePoints = [];
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final String driverId = 'Driver1';
@@ -27,10 +31,14 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   final MapController _mapController = MapController();
 
   @override
+  late StreamSubscription<DatabaseEvent> _busLocationSubscription;
+  late StreamSubscription<DatabaseEvent> _studentsSubscription;
+
+  @override
   void initState() {
     super.initState();
-    _fetchBusLocation();
-    _fetchActiveStudents();
+    _subscribeBusLocation();
+    _subscribeActiveStudents();
 
     _animationController = AnimationController(
       vsync: this,
@@ -41,21 +49,23 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
     );
   }
 
-  @override
   void dispose() {
+    _busLocationSubscription.cancel();
+    _studentsSubscription.cancel();
     _animationController.dispose();
     super.dispose();
   }
 
   // Fetch bus location from Firebase Realtime Database
-  void _fetchBusLocation() {
-    _database
+  void _subscribeBusLocation() {
+    _busLocationSubscription = _database
         .child('buses')
         .child(driverId)
         .child('location')
         .onValue
         .listen(
           (event) {
+            if (!mounted) return;
             if (event.snapshot.exists) {
               final data = event.snapshot.value as Map<dynamic, dynamic>;
               final latitude = data['latitude'] as double?;
@@ -71,6 +81,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             }
           },
           onError: (error) {
+            if (!mounted) return;
             print('Error fetching bus location: $error');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -82,12 +93,13 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   }
 
   // Fetch all active students from Firebase
-  void _fetchActiveStudents() {
-    _database
+  void _subscribeActiveStudents() {
+    _studentsSubscription = _database
         .child('students')
         .onValue
         .listen(
           (event) {
+            if (!mounted) return;
             if (event.snapshot.exists) {
               final data = event.snapshot.value as Map<dynamic, dynamic>;
               final List<Map<String, dynamic>> updatedStudents = [];
@@ -98,31 +110,33 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                   final longitude = status['longitude'] as double?;
                   if (latitude != null && longitude != null) {
                     updatedStudents.add({
-                      'name': studentName,
+                      'id': studentName,
                       'location': LatLng(latitude, longitude),
                     });
                   }
                 }
               });
-              setState(() {
-                activeStudents = updatedStudents;
-                // If no student is selected, select the first active student
-                if (activeStudents.isNotEmpty && selectedStudent == null) {
-                  selectedStudent = activeStudents[0];
-                  _updateRoute();
-                } else if (activeStudents.isEmpty) {
-                  selectedStudent = null;
-                  routePoints = [];
-                } else if (selectedStudent != null &&
-                    !activeStudents.any(
-                      (s) => s['name'] == selectedStudent!['name'],
-                    )) {
-                  // If selected student is no longer active, reset selection
-                  selectedStudent =
-                      activeStudents.isNotEmpty ? activeStudents[0] : null;
-                  _updateRoute();
-                }
-                _centerMap();
+              _fetchAndSetStudentNames(updatedStudents).then((_) {
+                setState(() {
+                  activeStudents = updatedStudents;
+                  // If no student is selected, select the first active student
+                  if (activeStudents.isNotEmpty && selectedStudent == null) {
+                    selectedStudent = activeStudents[0];
+                    _updateRoute();
+                  } else if (activeStudents.isEmpty) {
+                    selectedStudent = null;
+                    routePoints = [];
+                  } else if (selectedStudent != null &&
+                      !activeStudents.any(
+                        (s) => s['id'] == selectedStudent!['id'],
+                      )) {
+                    // If selected student is no longer active, reset selection
+                    selectedStudent =
+                        activeStudents.isNotEmpty ? activeStudents[0] : null;
+                    _updateRoute();
+                  }
+                  _centerMap();
+                });
               });
             } else {
               print('No student data found');
@@ -134,6 +148,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             }
           },
           onError: (error) {
+            if (!mounted) return;
             print('Error fetching active students: $error');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -144,6 +159,28 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             );
           },
         );
+  }
+
+  // Fetch and cache student names from Firestore
+  Future<void> _fetchAndSetStudentNames(
+    List<Map<String, dynamic>> students,
+  ) async {
+    for (final student in students) {
+      final id = student['id'];
+      if (!_userNamesCache.containsKey(id)) {
+        try {
+          final doc = await _firestore.collection('users').doc(id).get();
+          if (doc.exists) {
+            final data = doc.data() as Map<String, dynamic>;
+            _userNamesCache[id] = data['fullName'] ?? id;
+          } else {
+            _userNamesCache[id] = id;
+          }
+        } catch (e) {
+          _userNamesCache[id] = id;
+        }
+      }
+    }
   }
 
   // Fetch route from bus to selected student using OpenRouteService
@@ -329,12 +366,12 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                       point: student['location'] as LatLng,
                       width:
                           selectedStudent != null &&
-                                  selectedStudent!['name'] == student['name']
+                                  selectedStudent!['id'] == student['id']
                               ? 48
                               : 40,
                       height:
                           selectedStudent != null &&
-                                  selectedStudent!['name'] == student['name']
+                                  selectedStudent!['id'] == student['id']
                               ? 48
                               : 40,
                       child: ScaleTransition(
@@ -343,8 +380,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                           decoration: BoxDecoration(
                             color:
                                 selectedStudent != null &&
-                                        selectedStudent!['name'] ==
-                                            student['name']
+                                        selectedStudent!['id'] == student['id']
                                     ? Colors.green
                                     : Colors.blue,
                             shape: BoxShape.circle,
@@ -356,15 +392,38 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                               ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.person_pin_circle,
-                            color: Colors.white,
-                            size:
-                                selectedStudent != null &&
-                                        selectedStudent!['name'] ==
-                                            student['name']
-                                    ? 32
-                                    : 24,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.person_pin_circle,
+                                color: Colors.white,
+                                size:
+                                    selectedStudent != null &&
+                                            selectedStudent!['id'] ==
+                                                student['id']
+                                        ? 32
+                                        : 24,
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                _userNamesCache[student['id']] ?? student['id'],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 2,
+                                      color: Colors.black.withOpacity(0.5),
+                                      offset: Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -463,9 +522,11 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                       hint: const Text('Select a student'),
                       items:
                           activeStudents.map((student) {
+                            final fullName =
+                                _userNamesCache[student['id']] ?? student['id'];
                             return DropdownMenuItem<Map<String, dynamic>>(
                               value: student,
-                              child: Text(student['name']),
+                              child: Text(fullName),
                             );
                           }).toList(),
                       onChanged: (Map<String, dynamic>? newValue) {

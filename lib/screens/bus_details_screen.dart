@@ -1,14 +1,13 @@
 // lib/screens/bus_details_screen.dart
 import 'package:flutter/material.dart';
-import 'package:school_bus_tracking_app/screens/live_bus_tracking_screen.dart';
+import 'package:school_bus_app/screens/live_bus_tracking_screen.dart';
 
 class BusDetailsScreen extends StatelessWidget {
   // Mock data - replace with real data from Firebase later
   final String driverName = 'Ahmed Al-Mansour';
   final String plateNumber = 'ABC 1234';
   final String route = 'Route 5 - Al-Nakheel District';
-  final String busPhotoUrl =
-      'https://example.com/bus.jpg'; // Replace with actual image
+  final String busPhotoUrl = 'https://example.com/bus.jpg';
 
   @override
   Widget build(BuildContext context) {
