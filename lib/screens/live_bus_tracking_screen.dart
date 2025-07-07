@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:school_bus_tracking_app/screens/bus_details_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:open_route_service/open_route_service.dart';
 
 class LiveBusTrackingScreen extends StatefulWidget {
   const LiveBusTrackingScreen({Key? key}) : super(key: key);
@@ -14,11 +15,15 @@ class LiveBusTrackingScreen extends StatefulWidget {
 
 class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
     with SingleTickerProviderStateMixin {
-  LatLng studentLocation = const LatLng(24.7136, 46.6753); // Default fallback
-  LatLng busLocation = const LatLng(24.7236, 46.6853); // Default fallback
-  String arrivalTime = '10 min';
+  LatLng busLocation = const LatLng(24.7236, 46.6853);
+  List<Map<String, dynamic>> activeStudents = [];
+  Map<String, dynamic>? selectedStudent;
+  List<LatLng> routePoints = [];
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
-  final String studentName = 'Mohammed Ali'; // Hardcoded to match main.dart
+  final String driverId = 'Driver1';
+  final OpenRouteService openRouteService = OpenRouteService(
+    apiKey: '5b3ce3597851110001cf624862ba9d9ce4314f088c7a3b8fec0f957e',
+  );
   late AnimationController _animationController;
   late Animation<double> _animation;
   final MapController _mapController = MapController();
@@ -26,9 +31,9 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   @override
   void initState() {
     super.initState();
-    _fetchStudentLocation();
     _fetchBusLocation();
-    // Initialize animation controller for marker pulse effect
+    _fetchActiveStudents();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -44,46 +49,11 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
     super.dispose();
   }
 
-  // Fetch student location from Firebase Realtime Database
-  void _fetchStudentLocation() {
-    _database
-        .child('students')
-        .child(studentName)
-        .child('status')
-        .onValue
-        .listen(
-          (event) {
-            if (event.snapshot.exists) {
-              final data = event.snapshot.value as Map<dynamic, dynamic>;
-              final latitude = data['latitude'] as double?;
-              final longitude = data['longitude'] as double?;
-              if (latitude != null && longitude != null) {
-                setState(() {
-                  studentLocation = LatLng(latitude, longitude);
-                });
-              }
-            } else {
-              print('No location data found for $studentName');
-            }
-          },
-          onError: (error) {
-            print('Error fetching student location: $error');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Failed to fetch student location from database.',
-                ),
-              ),
-            );
-          },
-        );
-  }
-
   // Fetch bus location from Firebase Realtime Database
   void _fetchBusLocation() {
     _database
         .child('buses')
-        .child('bus1')
+        .child(driverId)
         .child('location')
         .onValue
         .listen(
@@ -95,10 +65,11 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
               if (latitude != null && longitude != null) {
                 setState(() {
                   busLocation = LatLng(latitude, longitude);
+                  _updateRoute(); // Update route when bus location changes
                 });
               }
             } else {
-              print('No location data found for bus1');
+              print('No location data found for $driverId');
             }
           },
           onError: (error) {
@@ -112,13 +83,130 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
         );
   }
 
-  // Calculate center point between student and bus locations
+  // Fetch all active students from Firebase
+  void _fetchActiveStudents() {
+    _database
+        .child('students')
+        .onValue
+        .listen(
+          (event) {
+            if (event.snapshot.exists) {
+              final data = event.snapshot.value as Map<dynamic, dynamic>;
+              final List<Map<String, dynamic>> updatedStudents = [];
+              data.forEach((studentName, studentData) {
+                final status = studentData['status'] as Map<dynamic, dynamic>?;
+                if (status != null && status['isActive'] == true) {
+                  final latitude = status['latitude'] as double?;
+                  final longitude = status['longitude'] as double?;
+                  if (latitude != null && longitude != null) {
+                    updatedStudents.add({
+                      'name': studentName,
+                      'location': LatLng(latitude, longitude),
+                    });
+                  }
+                }
+              });
+              setState(() {
+                activeStudents = updatedStudents;
+                // If no student is selected, select the first active student
+                if (activeStudents.isNotEmpty && selectedStudent == null) {
+                  selectedStudent = activeStudents[0];
+                  _updateRoute();
+                } else if (activeStudents.isEmpty) {
+                  selectedStudent = null;
+                  routePoints = [];
+                } else if (selectedStudent != null &&
+                    !activeStudents.any(
+                      (s) => s['name'] == selectedStudent!['name'],
+                    )) {
+                  // If selected student is no longer active, reset selection
+                  selectedStudent =
+                      activeStudents.isNotEmpty ? activeStudents[0] : null;
+                  _updateRoute();
+                }
+                _centerMap();
+              });
+            } else {
+              print('No student data found');
+              setState(() {
+                activeStudents = [];
+                selectedStudent = null;
+                routePoints = [];
+              });
+            }
+          },
+          onError: (error) {
+            print('Error fetching active students: $error');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Failed to fetch student locations from database.',
+                ),
+              ),
+            );
+          },
+        );
+  }
+
+  // Fetch route from bus to selected student using OpenRouteService
+  Future<void> _updateRoute() async {
+    if (selectedStudent == null) {
+      setState(() {
+        routePoints = [];
+      });
+      return;
+    }
+    try {
+      final List<ORSCoordinate> routeCoordinates = await openRouteService
+          .directionsRouteCoordsGet(
+            startCoordinate: ORSCoordinate(
+              latitude: busLocation.latitude,
+              longitude: busLocation.longitude,
+            ),
+            endCoordinate: ORSCoordinate(
+              latitude: selectedStudent!['location'].latitude,
+              longitude: selectedStudent!['location'].longitude,
+            ),
+          );
+      if (routeCoordinates.isNotEmpty) {
+        setState(() {
+          routePoints =
+              routeCoordinates
+                  .map((coord) => LatLng(coord.latitude, coord.longitude))
+                  .toList();
+        });
+        _centerMap();
+      } else {
+        throw Exception('No route coordinates found');
+      }
+    } catch (e) {
+      print('Error fetching route: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to fetch route from OpenRouteService.'),
+        ),
+      );
+      setState(() {
+        routePoints = [];
+      });
+    }
+  }
+
+  // Calculate center point among bus and selected student (or just bus if none selected)
   LatLng _calculateCenterPoint() {
-    final double centerLat =
-        (studentLocation.latitude + busLocation.latitude) / 2;
-    final double centerLon =
-        (studentLocation.longitude + busLocation.longitude) / 2;
-    return LatLng(centerLat, centerLon);
+    if (selectedStudent == null || activeStudents.isEmpty) {
+      return busLocation; // Fallback to bus location
+    }
+    final double totalLat =
+        busLocation.latitude + selectedStudent!['location'].latitude;
+    final double totalLon =
+        busLocation.longitude + selectedStudent!['location'].longitude;
+    return LatLng(totalLat / 2, totalLon / 2);
+  }
+
+  // Center map on bus and selected student
+  void _centerMap() {
+    _mapController.move(_calculateCenterPoint(), _mapController.zoom);
   }
 
   // Zoom in on the map
@@ -131,11 +219,6 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
     _mapController.move(_mapController.center, _mapController.zoom - 1);
   }
 
-  // Center map on student location
-  void _centerOnStudent() {
-    _mapController.move(studentLocation, _mapController.zoom);
-  }
-
   // Center map on bus location
   void _centerOnBus() {
     _mapController.move(busLocation, _mapController.zoom);
@@ -144,7 +227,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Live Bus Tracking')),
+      appBar: AppBar(title: const Text('Live Route Tracking')),
       body: Stack(
         children: [
           FlutterMap(
@@ -155,34 +238,19 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.app',
               ),
+              PolylineLayer(
+                polylines: [
+                  if (routePoints.isNotEmpty)
+                    Polyline(
+                      points: routePoints,
+                      strokeWidth: 4.0,
+                      color: Colors.green,
+                    ),
+                ],
+              ),
               MarkerLayer(
                 markers: [
-                  Marker(
-                    point: studentLocation,
-                    width: 40,
-                    height: 40,
-                    child: ScaleTransition(
-                      scale: _animation,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.person_pin_circle,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Bus marker
                   Marker(
                     point: busLocation,
                     width: 40,
@@ -209,81 +277,161 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                       ),
                     ),
                   ),
+                  // Active student markers
+                  ...activeStudents.map(
+                    (student) => Marker(
+                      point: student['location'] as LatLng,
+                      width:
+                          selectedStudent != null &&
+                                  selectedStudent!['name'] == student['name']
+                              ? 48
+                              : 40,
+                      height:
+                          selectedStudent != null &&
+                                  selectedStudent!['name'] == student['name']
+                              ? 48
+                              : 40,
+                      child: ScaleTransition(
+                        scale: _animation,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color:
+                                selectedStudent != null &&
+                                        selectedStudent!['name'] ==
+                                            student['name']
+                                    ? Colors.green
+                                    : Colors.blue,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.person_pin_circle,
+                            color: Colors.white,
+                            size:
+                                selectedStudent != null &&
+                                        selectedStudent!['name'] ==
+                                            student['name']
+                                    ? 32
+                                    : 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
           Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: _buildArrivalInfoCard(),
-          ),
-          Positioned(
             top: 20,
-            right: 20,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.my_location, color: Colors.blue),
-                onPressed: _centerOnStudent,
-                tooltip: 'Center on My Location',
-              ),
-            ),
-          ),
-          Positioned(
-            top: 76,
-            right: 20,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.directions_bus, color: Colors.red),
-                onPressed: _centerOnBus,
-                tooltip: 'Center on Bus Location',
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 100,
             right: 20,
             child: Column(
               children: [
-                FloatingActionButton(
-                  heroTag: 'zoomIn',
-                  mini: true,
-                  backgroundColor: Colors.white,
-                  onPressed: _zoomIn,
-                  child: const Icon(Icons.add, color: Colors.black),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.directions_bus, color: Colors.red),
+                    onPressed: _centerOnBus,
+                    tooltip: 'Center on Bus Location',
+                  ),
                 ),
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  heroTag: 'zoomOut',
-                  mini: true,
-                  backgroundColor: Colors.white,
-                  onPressed: _zoomOut,
-                  child: const Icon(Icons.remove, color: Colors.black),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.add, color: Colors.black),
+                    onPressed: _zoomIn,
+                    tooltip: 'Zoom In',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.remove, color: Colors.black),
+                    onPressed: _zoomOut,
+                    tooltip: 'Zoom Out',
+                  ),
                 ),
               ],
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Select Student',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButton<Map<String, dynamic>>(
+                      isExpanded: true,
+                      value: selectedStudent,
+                      hint: const Text('Select a student'),
+                      items:
+                          activeStudents.map((student) {
+                            return DropdownMenuItem<Map<String, dynamic>>(
+                              value: student,
+                              child: Text(student['name']),
+                            );
+                          }).toList(),
+                      onChanged: (Map<String, dynamic>? newValue) {
+                        setState(() {
+                          selectedStudent = newValue;
+                          _updateRoute();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -296,36 +444,6 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             MaterialPageRoute(builder: (context) => BusDetailsScreen()),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildArrivalInfoCard() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Bus Arrival Time',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              arrivalTime,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: 0.3, // Replace with actual progress
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-            ),
-          ],
-        ),
       ),
     );
   }
