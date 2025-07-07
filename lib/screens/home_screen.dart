@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:school_bus_tracking_app/screens/bus_details_screen.dart';
 import 'package:school_bus_tracking_app/screens/live_bus_tracking_screen.dart';
 import 'package:school_bus_tracking_app/screens/support_screen.dart';
 import 'package:geolocator/geolocator.dart';
@@ -151,25 +150,44 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  _buildDriverHeader(context),
-                  const SizedBox(height: 32),
-                  _buildBusLocationCard(context),
-                  const SizedBox(height: 32),
-                  _buildQuickActionsGrid(context),
-                  const SizedBox(height: 100), // Bottom padding for nav bar
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          // Subtle gradient background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFf8fafc),
+                  Color(0xFFe0c3fc),
+                  Color(0xFF8ec5fc),
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
+          ),
+          CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 32),
+                      _buildDriverHeader(context),
+                      const SizedBox(height: 32),
+                      _buildBusLocationCard(context),
+                      const SizedBox(height: 32),
+                      _buildQuickActionsGrid(context),
+                      const SizedBox(height: 100), // Bottom padding for nav bar
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -486,7 +504,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfileScreen()),
+                  MaterialPageRoute(builder: (context) => SupportScreen()),
                 );
               },
             ),
@@ -504,53 +522,79 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     required Gradient gradient,
     required VoidCallback onTap,
   }) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            offset: const Offset(0, 4),
-            blurRadius: 16,
+            color: Colors.black.withOpacity(0.07),
+            offset: const Offset(0, 8),
+            blurRadius: 32,
           ),
         ],
+        gradient: LinearGradient(
+          colors: [
+            gradient.colors.first.withOpacity(0.94),
+            gradient.colors.last.withOpacity(0.94),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           onTap: onTap,
+          splashColor: Colors.white.withOpacity(0.10),
+          highlightColor: Colors.white.withOpacity(0.08),
           child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.all(22.0),
+            child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    gradient: gradient,
-                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white.withOpacity(0.13),
+                    shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 28, color: Colors.white),
+                  child: Icon(icon, color: Colors.white, size: 34),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
+                const SizedBox(width: 22),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.85),
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white,
+                  size: 18,
                 ),
               ],
             ),

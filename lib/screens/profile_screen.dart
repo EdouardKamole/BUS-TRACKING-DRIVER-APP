@@ -7,128 +7,293 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Mock data - replace with real data from Firebase later
   String name = 'Mohammed Ali';
   String phone = '+966501234567';
-  String schoolId = '20230045';
-  String photoUrl = 'https://example.com/student.jpg'; // Replace with actual image
+  String email = 'mohammed.ali@email.com';
+  String photoUrl = 'https://example.com/student.jpg';
 
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
-  late TextEditingController _schoolIdController;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: name);
     _phoneController = TextEditingController(text: phone);
-    _schoolIdController = TextEditingController(text: schoolId);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _schoolIdController.dispose();
     super.dispose();
   }
+
+  bool _isEditing = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Profile'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: _saveProfile,
-          ),
+          _isEditing
+              ? Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.check_rounded, color: Colors.deepPurple),
+                    tooltip: 'Save',
+                    onPressed: _saveProfile,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: Colors.grey),
+                    tooltip: 'Cancel',
+                    onPressed: () {
+                      setState(() {
+                        _isEditing = false;
+                        _nameController.text = name;
+                        _phoneController.text = phone;
+                      });
+                    },
+                  ),
+                ],
+              )
+              : IconButton(
+                icon: Icon(Icons.edit_rounded, color: Colors.deepPurple),
+                tooltip: 'Edit',
+                onPressed: () {
+                  setState(() {
+                    _isEditing = true;
+                  });
+                },
+              ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // Modern gradient background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFa18cd1), Color(0xFFfbc2eb)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(20, 100, 20, 20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage: NetworkImage(photoUrl),
-                    onBackgroundImageError: (exception, stackTrace) => Icon(Icons.person, size: 60),
+                  // Placeholder avatar with border and shadow
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 16,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.white, width: 4),
+                    ),
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person,
+                        size: 64,
+                        color: Colors.deepPurple.shade300,
+                      ),
+                    ),
                   ),
-                  FloatingActionButton.small(
-                    onPressed: _changePhoto,
-                    child: Icon(Icons.camera_alt),
+                  SizedBox(height: 32),
+                  _buildProfileField(
+                    label: 'Full Name',
+                    icon: Icons.person,
+                    controller: _nameController,
+                    isEditing: _isEditing,
+                  ),
+                  SizedBox(height: 20),
+                  _buildProfileField(
+                    label: 'Phone Number',
+                    icon: Icons.phone,
+                    controller: _phoneController,
+                    isEditing: _isEditing,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  SizedBox(height: 20),
+                  // Email (read-only)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.deepPurple.shade100),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.email, color: Colors.deepPurple),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            email,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4.0),
+                          child: Icon(
+                            Icons.lock_outline_rounded,
+                            size: 18,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 32),
+                  if (_isEditing)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.deepPurple,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 6,
+                          shadowColor: Colors.deepPurpleAccent.withOpacity(0.2),
+                          textStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        icon: Icon(Icons.save_rounded, color: Colors.white),
+                        label: Text(
+                          'Save Changes',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: _saveProfile,
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        elevation: 4,
+                        shadowColor: Colors.redAccent.withOpacity(0.2),
+                      ),
+                      icon: Icon(Icons.logout, color: Colors.white),
+                      label: Text(
+                        'Logout',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onPressed: _logout,
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 30),
-              _buildEditableField(
-                label: 'Full Name',
-                controller: _nameController,
-                icon: Icons.person,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              _buildEditableField(
-                label: 'Phone Number',
-                controller: _phoneController,
-                icon: Icons.phone,
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              _buildEditableField(
-                label: 'School ID',
-                controller: _schoolIdController,
-                icon: Icons.school,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your school ID';
-                  }
-                  return null;
-                },
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildEditableField({
+  Widget _buildProfileField({
     required String label,
-    required TextEditingController controller,
     required IconData icon,
+    required TextEditingController controller,
+    bool isEditing = false,
     TextInputType? keyboardType,
-    String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+    if (isEditing) {
+      return TextFormField(
+        controller: controller,
+        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Colors.deepPurple,
+            fontWeight: FontWeight.w600,
+          ),
+          prefixIcon: Icon(icon, color: Colors.deepPurple),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.85),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.deepPurple.shade100),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.deepPurple.shade100),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.deepPurple, width: 2),
+          ),
         ),
-      ),
-      keyboardType: keyboardType,
-      validator: validator,
-    );
+        keyboardType: keyboardType,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your $label'.toLowerCase();
+          }
+          return null;
+        },
+      );
+    } else {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.deepPurple.shade100),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.deepPurple),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                controller.text,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _saveProfile() {
@@ -136,38 +301,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         name = _nameController.text;
         phone = _phoneController.text;
-        schoolId = _schoolIdController.text;
+        _isEditing = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile updated successfully')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Profile updated successfully')));
     }
   }
 
-  void _changePhoto() {
-    // Implement photo change functionality
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Change Photo'),
-        content: Text('Select photo source'),
-        actions: [
-          TextButton(
-            child: Text('Camera'),
-            onPressed: () {
-              Navigator.pop(context);
-              // Open camera
-            },
-          ),
-          TextButton(
-            child: Text('Gallery'),
-            onPressed: () {
-              Navigator.pop(context);
-              // Open gallery
-            },
-          ),
-        ],
-      ),
-    );
+  void _logout() {
+    // Replace with real logout logic later
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Logged out')));
   }
 }

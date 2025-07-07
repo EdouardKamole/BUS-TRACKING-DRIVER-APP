@@ -1,8 +1,6 @@
-// lib/screens/live_bus_tracking_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:school_bus_tracking_app/screens/bus_details_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:open_route_service/open_route_service.dart';
 
@@ -227,9 +225,57 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Live Route Tracking')),
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
+          // Subtle gradient background for consistency
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFa18cd1), Color(0xFFfbc2eb)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          // Floating Back Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            left: 16,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(32),
+                onTap: () => Navigator.of(context).pop(),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.98),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black.withOpacity(0.11),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.19),
+                        blurRadius: 12,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.deepPurple,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Map widget
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(center: _calculateCenterPoint(), zoom: 14),
@@ -435,15 +481,6 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.directions_bus),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => BusDetailsScreen()),
-          );
-        },
       ),
     );
   }
