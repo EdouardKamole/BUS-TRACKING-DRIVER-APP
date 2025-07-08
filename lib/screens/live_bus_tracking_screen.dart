@@ -5,6 +5,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:open_route_service/open_route_service.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LiveBusTrackingScreen extends StatefulWidget {
   const LiveBusTrackingScreen({Key? key}) : super(key: key);
@@ -23,7 +25,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   Map<String, String> _userNamesCache = {};
   List<LatLng> routePoints = [];
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
-  final String driverId = 'Driver1';
+  late final String driverId;
   final OpenRouteService openRouteService = OpenRouteService(
     apiKey: '5b3ce3597851110001cf624862ba9d9ce4314f088c7a3b8fec0f957e',
   );
@@ -31,15 +33,18 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   late Animation<double> _animation;
   final MapController _mapController = MapController();
 
-  @override
   late StreamSubscription<DatabaseEvent> _busLocationSubscription;
   late StreamSubscription<DatabaseEvent> _studentsSubscription;
+
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
     super.initState();
+    driverId = FirebaseAuth.instance.currentUser?.uid ?? '';
     _subscribeBusLocation();
     _subscribeActiveStudents();
+    _startLocationUpdates();
 
     _animationController = AnimationController(
       vsync: this,
@@ -50,11 +55,48 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
     );
   }
 
+  @override
   void dispose() {
     _busLocationSubscription.cancel();
     _studentsSubscription.cancel();
     _animationController.dispose();
+    _positionStreamSubscription?.cancel();
     super.dispose();
+  }
+
+  void _startLocationUpdates() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are permanently denied
+      return;
+    }
+
+    _positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // meters
+      ),
+    ).listen((Position position) {
+      // Update location in Firebase
+      _database.child('busLocation').set({
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      });
+    });
   }
 
   // Fetch bus location from Firebase Realtime Database
@@ -123,9 +165,11 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                   // If no student is selected, select the first active student
                   if (activeStudents.isNotEmpty && selectedStudent == null) {
                     selectedStudent = activeStudents[0];
+                    selectedStudentId = selectedStudent!['id'];
                     _updateRoute();
                   } else if (activeStudents.isEmpty) {
                     selectedStudent = null;
+                    selectedStudentId = null;
                     routePoints = [];
                   } else if (selectedStudent != null &&
                       !activeStudents.any(
@@ -134,6 +178,8 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                     // If selected student is no longer active, reset selection
                     selectedStudent =
                         activeStudents.isNotEmpty ? activeStudents[0] : null;
+                    selectedStudentId =
+                        selectedStudent != null ? selectedStudent!['id'] : null;
                     _updateRoute();
                   }
                   _centerMap();
@@ -519,18 +565,25 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                     const SizedBox(height: 8),
                     DropdownButton<String>(
                       isExpanded: true,
-                      value: activeStudents.any((student) => student['id'] == selectedStudentId) ? selectedStudentId : null,
+                      value:
+                          activeStudents.any(
+                                (student) => student['id'] == selectedStudentId,
+                              )
+                              ? selectedStudentId
+                              : null,
                       hint: const Text('Select a student'),
-                      items: activeStudents
-                          .where((student) => student['id'] != null)
-                          .map((student) {
-                            final id = student['id'] as String;
-                            final fullName = _userNamesCache[id] ?? id;
-                            return DropdownMenuItem<String>(
-                              value: id,
-                              child: Text(fullName),
-                            );
-                          }).toList(),
+                      items:
+                          activeStudents
+                              .where((student) => student['id'] != null)
+                              .map((student) {
+                                final id = student['id'] as String;
+                                final fullName = _userNamesCache[id] ?? id;
+                                return DropdownMenuItem<String>(
+                                  value: id,
+                                  child: Text(fullName),
+                                );
+                              })
+                              .toList(),
                       onChanged: (String? newId) {
                         setState(() {
                           selectedStudentId = newId;
