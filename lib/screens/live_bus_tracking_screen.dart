@@ -18,8 +18,9 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   LatLng busLocation = const LatLng(24.7236, 46.6853);
   List<Map<String, dynamic>> activeStudents = [];
   Map<String, dynamic>? selectedStudent;
+  String? selectedStudentId;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  Map<String, String> _userNamesCache = {}; // studentId -> fullName
+  Map<String, String> _userNamesCache = {};
   List<LatLng> routePoints = [];
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final String driverId = 'Driver1';
@@ -516,22 +517,26 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
-                    DropdownButton<Map<String, dynamic>>(
+                    DropdownButton<String>(
                       isExpanded: true,
-                      value: selectedStudent,
+                      value: activeStudents.any((student) => student['id'] == selectedStudentId) ? selectedStudentId : null,
                       hint: const Text('Select a student'),
-                      items:
-                          activeStudents.map((student) {
-                            final fullName =
-                                _userNamesCache[student['id']] ?? student['id'];
-                            return DropdownMenuItem<Map<String, dynamic>>(
-                              value: student,
+                      items: activeStudents
+                          .where((student) => student['id'] != null)
+                          .map((student) {
+                            final id = student['id'] as String;
+                            final fullName = _userNamesCache[id] ?? id;
+                            return DropdownMenuItem<String>(
+                              value: id,
                               child: Text(fullName),
                             );
                           }).toList(),
-                      onChanged: (Map<String, dynamic>? newValue) {
+                      onChanged: (String? newId) {
                         setState(() {
-                          selectedStudent = newValue;
+                          selectedStudentId = newId;
+                          selectedStudent = activeStudents.firstWhere(
+                            (student) => student['id'] == newId,
+                          );
                           _updateRoute();
                         });
                       },

@@ -8,6 +8,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:629365692507:android:65cfbcb1a1795fd82e077e",
+        "android_client_info": {
+          "package_name": "com.example.school_bus_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629365692507-v4fo5ccna8tej6n3l6f8abun73ondrs1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2AsPn2ovZpTUaA4BbJPfsYgd96wlwoq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "629365692507-v4fo5ccna8tej6n3l6f8abun73ondrs1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "629365692507-ltsattquen7b9g79piqtbfoftiolasls.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.schoolBusTrackingApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:629365692507:android:d0e44ed38e932e392e077e",
         "android_client_info": {
           "package_name": "com.example.school_bus_tracking_app"

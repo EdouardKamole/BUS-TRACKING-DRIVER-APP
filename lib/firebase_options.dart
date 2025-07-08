@@ -51,9 +51,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyD2AsPn2ovZpTUaA4BbJPfsYgd96wlwoq4',
-    appId: '1:629365692507:android:d0e44ed38e932e392e077e',
+    appId: '1:629365692507:android:65cfbcb1a1795fd82e077e',
     messagingSenderId: '629365692507',
     projectId: 'bus-tracking-system-e41ba',
+    databaseURL: 'https://bus-tracking-system-e41ba-default-rtdb.firebaseio.com',
     storageBucket: 'bus-tracking-system-e41ba.firebasestorage.app',
   );
 
@@ -62,7 +63,10 @@ class DefaultFirebaseOptions {
     appId: '1:629365692507:ios:9c502eadd6821beb2e077e',
     messagingSenderId: '629365692507',
     projectId: 'bus-tracking-system-e41ba',
+    databaseURL: 'https://bus-tracking-system-e41ba-default-rtdb.firebaseio.com',
     storageBucket: 'bus-tracking-system-e41ba.firebasestorage.app',
+    iosClientId: '629365692507-ltsattquen7b9g79piqtbfoftiolasls.apps.googleusercontent.com',
     iosBundleId: 'com.example.schoolBusTrackingApp',
   );
+
 }

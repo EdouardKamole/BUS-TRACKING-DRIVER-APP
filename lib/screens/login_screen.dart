@@ -60,11 +60,13 @@ class _LoginScreenState extends State<LoginScreen>
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => DriverHomeScreen()),
         );
       } on FirebaseAuthException catch (e) {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
