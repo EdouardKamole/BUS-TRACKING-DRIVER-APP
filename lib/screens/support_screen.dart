@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SupportScreen extends StatefulWidget {
   const SupportScreen({Key? key}) : super(key: key);
@@ -118,7 +120,10 @@ class _SupportScreenState extends State<SupportScreen> {
                         SizedBox(height: 10),
                         Text(
                           'Contact Information',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(height: 15),
                         _buildContactOption(

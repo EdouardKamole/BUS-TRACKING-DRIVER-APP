@@ -1,5 +1,7 @@
 // lib/screens/bus_details_screen.dart
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:school_bus_app/screens/live_bus_tracking_screen.dart';
 
 class BusDetailsScreen extends StatelessWidget {
@@ -12,12 +14,21 @@ class BusDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Bus Details')),
+      appBar: AppBar(title: Text(
+  'Bus Details',
+  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 20.sp),
+)),
+
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Text(
+              'Bus Information',
+              style: GoogleFonts.poppins(fontSize: 22.sp, fontWeight: FontWeight.w700),
+            ),
+            SizedBox(height: 20.h),
             Container(
               height: 200,
               width: double.infinity,
@@ -57,7 +68,8 @@ class BusDetailsScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: Text('View on Map'),
+              child: Text('View on Map', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 16.sp)),
+
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
@@ -83,16 +95,16 @@ class BusDetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            Icon(icon, size: 30, color: Colors.blue),
-            SizedBox(width: 15),
+            Icon(icon, size: 30.sp, color: Colors.blue),
+            SizedBox(width: 15.w),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontSize: 14, color: Colors.grey)),
-                SizedBox(height: 5),
+                Text(title, style: GoogleFonts.poppins(fontSize: 14.sp, color: Colors.grey)),
+                SizedBox(height: 5.h),
                 Text(
                   value,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.poppins(fontSize: 18.sp, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

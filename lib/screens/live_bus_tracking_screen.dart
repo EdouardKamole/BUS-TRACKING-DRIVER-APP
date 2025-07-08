@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -277,7 +279,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
   // Calculate center point among bus and selected student (or just bus if none selected)
   LatLng _calculateCenterPoint() {
     if (selectedStudent == null || activeStudents.isEmpty) {
-      return busLocation; // Fallback to bus location
+      return busLocation;
     }
     final double totalLat =
         busLocation.latitude + selectedStudent!['location'].latitude;
@@ -446,18 +448,18 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                                 Icons.person_pin_circle,
                                 color: Colors.white,
                                 size:
-                                    selectedStudent != null &&
+                                    (selectedStudent != null &&
                                             selectedStudent!['id'] ==
-                                                student['id']
-                                        ? 32
-                                        : 24,
+                                                student['id'])
+                                        ? 32.0
+                                        : 24.0,
                               ),
                               SizedBox(height: 2),
                               Text(
                                 _userNamesCache[student['id']] ?? student['id'],
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10.sp,
                                   color: Colors.white,
-                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   shadows: [
                                     Shadow(
@@ -542,6 +544,21 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
                   ),
                 ),
               ],
+            ),
+          ),
+          // Floating Back Button
+          Positioned(
+            top: 40,
+            left: 20,
+            child: Material(
+              color: Colors.white,
+              elevation: 4,
+              shape: const CircleBorder(),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+                tooltip: 'Back',
+              ),
             ),
           ),
           Positioned(

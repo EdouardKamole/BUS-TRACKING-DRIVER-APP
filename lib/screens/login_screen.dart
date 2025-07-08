@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:school_bus_app/screens/home_screen.dart';
 import 'package:school_bus_app/screens/password_reset_screen.dart';
 import 'registration_screen.dart';
@@ -95,13 +97,13 @@ class _LoginScreenState extends State<LoginScreen>
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
+          style: GoogleFonts.poppins(
+            fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1F2937),
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 8.h),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -152,40 +154,6 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return SizedBox(
-      height: 48,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Colors.grey[300]!),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 20, color: Colors.grey[700]),
-            SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -285,20 +253,20 @@ class _LoginScreenState extends State<LoginScreen>
                                       color: Colors.white,
                                     ),
                                   ),
-                                  SizedBox(height: 12),
+                                  SizedBox(height: 6.h),
                                   Text(
                                     'Welcome Back!',
-                                    style: TextStyle(
-                                      fontSize: 28,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 24.sp,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF1F2937),
                                     ),
                                   ),
-                                  SizedBox(height: 8),
+                                  SizedBox(height: 2.h),
                                   Text(
                                     'Sign in to continue to Bech Bus',
-                                    style: TextStyle(
-                                      fontSize: 14,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14.sp,
                                       color: Colors.grey[600],
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -306,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 ],
                               ),
                             ),
-                            SizedBox(height: 24),
+                            SizedBox(height: 40.h),
 
                             // Login form
                             Form(
@@ -332,7 +300,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       return null;
                                     },
                                   ),
-                                  SizedBox(height: 16),
+                                  SizedBox(height: 9.h),
 
                                   // Password field
                                   _buildTextField(
@@ -351,41 +319,13 @@ class _LoginScreenState extends State<LoginScreen>
                                       return null;
                                     },
                                   ),
-                                  SizedBox(height: 16),
+                                  SizedBox(height: 9.h),
 
                                   // Remember me & Forgot password
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Row(
-                                        children: [
-                                          Transform.scale(
-                                            scale: 0.8,
-                                            child: Checkbox(
-                                              value: _rememberMe,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _rememberMe = value!;
-                                                });
-                                              },
-                                              activeColor: Color(0xFF667EEA),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            'Remember me',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[600],
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                                       TextButton(
                                         onPressed: () {
                                           Navigator.push(
@@ -399,8 +339,8 @@ class _LoginScreenState extends State<LoginScreen>
                                         },
                                         child: Text(
                                           'Forgot Password?',
-                                          style: TextStyle(
-                                            fontSize: 14,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 10.sp,
                                             color: Color(0xFF667EEA),
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -408,7 +348,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 18),
+                                  SizedBox(height: 9.h),
 
                                   // Login button
                                   SizedBox(
@@ -449,8 +389,8 @@ class _LoginScreenState extends State<LoginScreen>
                                                   )
                                                   : Text(
                                                     'Sign In',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 14.sp,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                     ),
@@ -467,7 +407,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     children: [
                                       Text(
                                         "Don't have an account? ",
-                                        style: TextStyle(fontSize: 14),
+                                        style: TextStyle(fontSize: 11.sp),
                                       ),
                                       GestureDetector(
                                         onTap: () {
@@ -485,7 +425,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           style: TextStyle(
                                             color: Color(0xFF667EEA),
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            fontSize: 11.sp,
                                             decoration:
                                                 TextDecoration.underline,
                                           ),
@@ -495,35 +435,35 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
 
                                   // Or divider
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          height: 1,
-                                          color: Colors.grey[300],
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                        ),
-                                        child: Text(
-                                          'Or continue with',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          height: 1,
-                                          color: Colors.grey[300],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  // Row(
+                                  //   children: [
+                                  //     Expanded(
+                                  //       child: Container(
+                                  //         height: 1,
+                                  //         color: Colors.grey[300],
+                                  //       ),
+                                  //     ),
+                                  //     Padding(
+                                  //       padding: EdgeInsets.symmetric(
+                                  //         horizontal: 16,
+                                  //       ),
+                                  //       child: Text(
+                                  //         'Or continue with',
+                                  //         style: TextStyle(
+                                  //           fontSize: 14,
+                                  //           color: Colors.grey[600],
+                                  //           fontWeight: FontWeight.w500,
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //     Expanded(
+                                  //       child: Container(
+                                  //         height: 1,
+                                  //         color: Colors.grey[300],
+                                  //       ),
+                                  //     ),
+                                  //   ],
+                                  // ),
                                   SizedBox(height: 24),
 
                                   // Social login buttons
@@ -554,42 +494,6 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ),
                             SizedBox(height: 24),
-
-                            // Sign up link
-                            Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Don\'t have an account? ',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => RegistrationScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      'Sign Up',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xFF667EEA),
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),

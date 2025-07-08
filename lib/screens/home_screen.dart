@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously, avoid_print, use_rethrow_when_possible
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:school_bus_app/screens/live_bus_tracking_screen.dart';
@@ -444,14 +446,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                     ),
                   );
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.map_outlined,
-                  size: 18,
+                  size: 12.sp,
                   color: Color(0xFFF97316),
                 ),
-                label: const Text(
+                label: Text(
                   'View Full Map',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     color: Color(0xFFF97316),
                     fontWeight: FontWeight.w600,
                   ),
@@ -468,21 +470,21 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Quick Actions',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
+          style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
             color: Color(0xFF1F2937),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 4.h),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+          crossAxisSpacing: 16.sp,
+          mainAxisSpacing: 16.sp,
           childAspectRatio: 1.1,
           children: [
             _buildActionCard(
@@ -535,7 +537,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 10.sp),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
@@ -563,45 +565,47 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
           splashColor: Colors.white.withOpacity(0.10),
           highlightColor: Colors.white.withOpacity(0.08),
           child: Padding(
-            padding: const EdgeInsets.all(22.0),
+            padding: EdgeInsets.all(10.sp),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(18),
+                  padding: EdgeInsets.all(8.sp),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.13),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: Colors.white, size: 34),
+                  child: Icon(icon, color: Colors.white, size: 14.sp),
                 ),
-                const SizedBox(width: 22),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
+                SizedBox(width: 8.w),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withOpacity(0.85),
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.1,
-                        ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13.sp,
+                        color: Colors.white.withOpacity(0.85),
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.1,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const Icon(
+                SizedBox(width: 8.w),
+                Icon(
                   Icons.arrow_forward_ios_rounded,
                   color: Colors.white,
                   size: 18,
@@ -627,48 +631,45 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
         ],
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                context,
-                icon: Icons.home_rounded,
-                label: 'Home',
-                isActive: true,
-                onTap: () {
-                  // Already on home
-                },
-              ),
-              _buildNavItem(
-                context,
-                icon: Icons.map_rounded,
-                label: 'Route',
-                isActive: false,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LiveBusTrackingScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildNavItem(
-                context,
-                icon: Icons.person,
-                label: 'Profile',
-                isActive: false,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(
+              context,
+              icon: Icons.home_rounded,
+              label: 'Home',
+              isActive: true,
+              onTap: () {
+                // Already on home
+              },
+            ),
+            _buildNavItem(
+              context,
+              icon: Icons.map_rounded,
+              label: 'Route',
+              isActive: false,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LiveBusTrackingScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildNavItem(
+              context,
+              icon: Icons.person,
+              label: 'Profile',
+              isActive: false,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileScreen()),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -684,7 +685,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp),
         decoration: BoxDecoration(
           color:
               isActive
@@ -700,11 +701,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               color: isActive ? const Color(0xFFF97316) : Colors.grey[500],
               size: 24,
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.sp),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
+              style: GoogleFonts.poppins(
+                fontSize: 12.sp,
                 color: isActive ? const Color(0xFFF97316) : Colors.grey[500],
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -60,7 +62,10 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       if (!_acceptTerms) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Please accept the terms and conditions'),
+            content: Text(
+              'Please accept the terms and conditions',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -123,13 +128,13 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
+          style: GoogleFonts.poppins(
+            fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1F2937),
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 4.h),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -270,8 +275,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                   children: [
                                     Text(
                                       'Create Account',
-                                      style: TextStyle(
-                                        fontSize: 28,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 24.sp,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF1F2937),
                                       ),
@@ -279,8 +284,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                     SizedBox(height: 8),
                                     Text(
                                       'Join Bech Bus for seamless school transportation',
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 13.sp,
                                         color: Colors.grey[600],
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -289,7 +294,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 32),
+                              SizedBox(height: 14.h),
                               // Registration form
                               Expanded(
                                 child: Form(
@@ -311,7 +316,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 20),
+                                        SizedBox(height: 10.h),
                                         // Email field
                                         _buildTextField(
                                           controller: _emailController,
@@ -333,7 +338,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 20),
+                                        SizedBox(height: 10.h),
                                         // Phone field
                                         _buildTextField(
                                           controller: _phoneController,
@@ -349,7 +354,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 20),
+                                        SizedBox(height: 10.h),
                                         // Password field
                                         _buildTextField(
                                           controller: _passwordController,
@@ -369,7 +374,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 20),
+                                        SizedBox(height: 10.h),
                                         // Confirm Password field
                                         _buildTextField(
                                           controller:
@@ -391,7 +396,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 20),
+                                        SizedBox(height: 10.h),
                                         // Terms and conditions
                                         Row(
                                           crossAxisAlignment:
@@ -420,8 +425,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                                 ),
                                                 child: RichText(
                                                   text: TextSpan(
-                                                    style: TextStyle(
-                                                      fontSize: 14,
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 12.sp,
                                                       color: Colors.grey[600],
                                                       fontWeight:
                                                           FontWeight.w500,
@@ -433,24 +438,28 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                                       TextSpan(
                                                         text:
                                                             'Terms of Service',
-                                                        style: TextStyle(
-                                                          color: Color(
-                                                            0xFF667EEA,
-                                                          ),
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                              color: Color(
+                                                                0xFF667EEA,
+                                                              ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                       ),
                                                       TextSpan(text: ' and '),
                                                       TextSpan(
                                                         text: 'Privacy Policy',
-                                                        style: TextStyle(
-                                                          color: Color(
-                                                            0xFF667EEA,
-                                                          ),
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                              color: Color(
+                                                                0xFF667EEA,
+                                                              ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                       ),
                                                     ],
                                                   ),
@@ -459,11 +468,10 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             ),
                                           ],
                                         ),
-                                        SizedBox(height: 32),
+                                        SizedBox(height: 12.h),
                                         // Sign up button
                                         SizedBox(
                                           width: double.infinity,
-                                          height: 56,
                                           child: ElevatedButton(
                                             onPressed:
                                                 _isLoading
@@ -472,8 +480,9 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
                                                   Colors.transparent,
-                                              foregroundColor: Colors.white,
+                                              shadowColor: Colors.transparent,
                                               elevation: 0,
+                                              padding: EdgeInsets.zero,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(16),
@@ -491,7 +500,11 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                                     BorderRadius.circular(16),
                                               ),
                                               child: Container(
+                                                width: double.infinity,
                                                 alignment: Alignment.center,
+                                                padding: EdgeInsets.symmetric(
+                                                  vertical: 12.h,
+                                                ),
                                                 child:
                                                     _isLoading
                                                         ? CircularProgressIndicator(
@@ -500,17 +513,23 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                                         )
                                                         : Text(
                                                           'Create Account',
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
+                                                          style:
+                                                              GoogleFonts.poppins(
+                                                                fontSize:
+                                                                    13.5.sp,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                              ),
                                                         ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                        SizedBox(height: 24),
+                                        SizedBox(height: 12.h),
                                         // Sign in link
                                         Center(
                                           child: Row(
@@ -519,8 +538,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                             children: [
                                               Text(
                                                 'Already have an account? ',
-                                                style: TextStyle(
-                                                  fontSize: 14,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 10.sp,
                                                   color: Colors.grey[600],
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -532,7 +551,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                                 child: Text(
                                                   'Sign In',
                                                   style: TextStyle(
-                                                    fontSize: 14,
+                                                    fontSize: 10.sp,
                                                     color: Color(0xFF667EEA),
                                                     fontWeight: FontWeight.w700,
                                                   ),

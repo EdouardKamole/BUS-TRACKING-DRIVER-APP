@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -87,8 +89,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
+          style: GoogleFonts.poppins(
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1F2937),
           ),
@@ -240,8 +242,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                       _isEmailSent
                                           ? 'Check Your Email'
                                           : 'Forgot Password?',
-                                      style: TextStyle(
-                                        fontSize: 28,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 28.sp,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF1F2937),
                                       ),
@@ -251,8 +253,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                       _isEmailSent
                                           ? 'We\'ve sent a password reset link to your email address'
                                           : 'Don\'t worry! Enter your email and we\'ll send you a reset link',
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16.sp,
                                         color: Colors.grey[600],
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -327,8 +329,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                                       )
                                                       : Text(
                                                         'Send Reset Email',
-                                                        style: TextStyle(
-                                                          fontSize: 16,
+                                                        style: GoogleFonts.poppins(
+                                                          fontSize: 16.sp,
                                                           fontWeight:
                                                               FontWeight.w600,
                                                         ),
@@ -361,8 +363,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                       SizedBox(height: 16),
                                       Text(
                                         'Email Sent Successfully!',
-                                        style: TextStyle(
-                                          fontSize: 18,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.w600,
                                           color: Color(0xFF10B981),
                                         ),
@@ -370,8 +372,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                       SizedBox(height: 8),
                                       Text(
                                         'Please check your email inbox and follow the instructions to reset your password.',
-                                        style: TextStyle(
-                                          fontSize: 14,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14.sp,
                                           color: Colors.grey[600],
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -408,8 +410,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                             )
                                             : Text(
                                               'Resend Email',
-                                              style: TextStyle(
-                                                fontSize: 16,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 16.sp,
                                                 fontWeight: FontWeight.w600,
                                                 color: Color(0xFF667EEA),
                                               ),
@@ -445,8 +447,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                         alignment: Alignment.center,
                                         child: Text(
                                           'Back to Login',
-                                          style: TextStyle(
-                                            fontSize: 16,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 16.sp,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -460,8 +462,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                               Center(
                                 child: Text(
                                   'Need help? Contact support',
-                                  style: TextStyle(
-                                    fontSize: 14,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14.sp,
                                     color: Colors.grey[500],
                                     fontWeight: FontWeight.w500,
                                   ),

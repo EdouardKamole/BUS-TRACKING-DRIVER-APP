@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:school_bus_app/screens/login_screen.dart';
@@ -70,15 +72,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
-        title: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
         actions: [
           _isEditing
               ? Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.check_rounded, color: Colors.deepPurple),
+                    icon: Icon(Icons.check_rounded, color: Colors.white),
                     tooltip: 'Save',
                     onPressed: _saveProfile,
                   ),
@@ -96,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               )
               : IconButton(
-                icon: Icon(Icons.edit_rounded, color: Colors.deepPurple),
+                icon: Icon(Icons.edit_rounded, color: Colors.white),
                 tooltip: 'Edit',
                 onPressed: () {
                   setState(() {
@@ -139,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       border: Border.all(color: Colors.white, width: 4),
                     ),
                     child: CircleAvatar(
-                      radius: 60,
+                      radius: 30.sp,
                       backgroundColor: Colors.white,
                       child: Icon(
                         Icons.person,
@@ -179,8 +180,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Expanded(
                           child: Text(
                             email,
-                            style: TextStyle(
-                              fontSize: 16,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
                               color: Colors.black87,
                               fontWeight: FontWeight.w500,
                             ),
@@ -198,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 32),
+                  SizedBox(height: 15.h),
                   if (_isEditing)
                     SizedBox(
                       width: double.infinity,
@@ -211,20 +212,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           elevation: 6,
                           shadowColor: Colors.deepPurpleAccent.withOpacity(0.2),
-                          textStyle: TextStyle(
-                            fontSize: 18,
+                          textStyle: GoogleFonts.poppins(
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         icon: Icon(Icons.save_rounded, color: Colors.white),
                         label: Text(
                           'Save Changes',
-                          style: TextStyle(color: Colors.white),
+                          style: GoogleFonts.poppins(color: Colors.white),
                         ),
                         onPressed: _saveProfile,
                       ),
                     ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 8.h),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -234,8 +235,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        textStyle: TextStyle(
-                          fontSize: 17,
+                        textStyle: GoogleFonts.poppins(
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),
                         elevation: 4,
@@ -244,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icon(Icons.logout, color: Colors.white),
                       label: Text(
                         'Logout',
-                        style: TextStyle(color: Colors.white),
+                        style: GoogleFonts.poppins(color: Colors.white),
                       ),
                       onPressed: _logout,
                     ),
@@ -268,10 +269,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (isEditing) {
       return TextFormField(
         controller: controller,
-        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+        style: GoogleFonts.poppins(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w500,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
+          labelStyle: GoogleFonts.poppins(
             color: Colors.deepPurple,
             fontWeight: FontWeight.w600,
           ),
@@ -314,8 +318,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               child: Text(
                 controller.text,
-                style: TextStyle(
-                  fontSize: 16,
+                style: GoogleFonts.poppins(
+                  fontSize: 13.sp,
                   color: Colors.black87,
                   fontWeight: FontWeight.w500,
                 ),
