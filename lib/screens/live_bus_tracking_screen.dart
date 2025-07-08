@@ -88,7 +88,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
     _positionStreamSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // meters
+        distanceFilter: 10,
       ),
     ).listen((Position position) {
       // Update location in Firebase
@@ -116,7 +116,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
               if (latitude != null && longitude != null) {
                 setState(() {
                   busLocation = LatLng(latitude, longitude);
-                  _updateRoute(); // Update route when bus location changes
+                  _updateRoute();
                 });
               }
             } else {
