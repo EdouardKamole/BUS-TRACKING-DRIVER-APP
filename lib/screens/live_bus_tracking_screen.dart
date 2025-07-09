@@ -94,7 +94,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
       ),
     ).listen((Position position) {
       // Update location in Firebase
-      _database.child('busLocation').set({
+      _database.child('buses').child(driverId).child('location').set({
         'latitude': position.latitude,
         'longitude': position.longitude,
       });
