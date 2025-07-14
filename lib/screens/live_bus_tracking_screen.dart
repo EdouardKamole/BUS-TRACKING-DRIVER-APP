@@ -367,7 +367,8 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             options: MapOptions(center: _calculateCenterPoint(), zoom: 14),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=atBiJT3x9AIw2gQtXqfP',
                 userAgentPackageName: 'com.example.app',
               ),
               PolylineLayer(

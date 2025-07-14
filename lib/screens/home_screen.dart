@@ -393,7 +393,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
               ),
               children: [
                 TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate:
+                      'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=atBiJT3x9AIw2gQtXqfP',
                   userAgentPackageName: 'com.example.app',
                 ),
                 MarkerLayer(
