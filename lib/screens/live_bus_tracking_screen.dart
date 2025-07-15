@@ -368,7 +368,7 @@ class _LiveBusTrackingScreenState extends State<LiveBusTrackingScreen>
             children: [
               TileLayer(
                 urlTemplate:
-                    'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=atBiJT3x9AIw2gQtXqfP',
+                    'https://api.maptiler.com/maps/basic-v2/{z}/{x}/{y}@2x.png?key=atBiJT3x9AIw2gQtXqfP',
                 userAgentPackageName: 'com.example.app',
               ),
               PolylineLayer(
